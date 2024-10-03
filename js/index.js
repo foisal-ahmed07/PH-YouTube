@@ -3,7 +3,7 @@ function getTimeString(time) {
   let remainSecond = time % 3600;
   const minute = parseInt(remainSecond / 60);
   remainSecond = remainSecond % 60;
-  
+
   return `${hours} hours ${minute} minute ${remainSecond} second ago `;
 }
 
@@ -24,8 +24,36 @@ const loadVideo = () => {
     .catch((error) => console.log(error));
 };
 
+// button event
+const loadCategoryVideo = (id) => {
+  // alert(id);
+  fetch(`https://openapi.programming-hero.com/api/phero-tube/category/${id}`)
+    .then((res) => res.json())
+    .then((data) => displayVideos(data.category))
+    .catch((error) => console.log(error));
+};
+
 const displayVideos = (videos) => {
   const videoContainer = document.getElementById("videos");
+  videoContainer.innerHTML = "";
+
+  if (videos.length === 0) {
+    videoContainer.classList.remove("grid");
+    videoContainer.innerHTML = `
+    <div class = "w-full min-h-[300px] flex flex-col gap-5 justify-center items-center">
+
+    <img class = "" src="./assets/Icon.png" alt="No Videos">
+
+    <p class ="text-3xl font-bold text-center">'Oops!! Sorry, There is no <br> content here'</p>
+    
+    </div>
+    
+    `;
+    return;
+  } else {
+    videoContainer.classList.add("grid");
+  }
+
   videos.forEach((video) => {
     const card = document.createElement("div");
     card.classList = "card card-compact";
@@ -38,7 +66,7 @@ const displayVideos = (videos) => {
       ${
         video.others.posted_date?.length === 0
           ? ""
-          : `<span class ="absolute bottom-2   right-5 text-white bg-black p-2 rounded-lg">${getTimeString(
+          : `<span class ="absolute bottom-2 text-xs  right-5 text-white bg-black p-2 rounded-lg">${getTimeString(
               video.others.posted_date
             )}</span>`
       }
@@ -81,11 +109,13 @@ const displayCatagories = (catagories) => {
 
   catagories.forEach((item) => {
     // creating btn
-    const button = document.createElement("button");
-    button.classList = "btn";
-    button.innerText = item.category;
+    const buttonContainer = document.createElement("div");
 
-    catagoriesContainer.append(button);
+    buttonContainer.innerHTML = `
+    <button onclick="loadCategoryVideo(${item.category_id})" class = "btn">${item.category}</button>
+    `;
+
+    catagoriesContainer.append(buttonContainer);
   });
 };
 
