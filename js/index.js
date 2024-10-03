@@ -7,6 +7,13 @@ function getTimeString(time) {
   return `${hours} hours ${minute} minute ${remainSecond} second ago `;
 }
 
+const removeActiveClass = () => {
+  const buttons = document.getElementsByClassName("category-btn");
+  for (let btn of buttons) {
+    btn.classList.remove("active");
+  }
+};
+
 // 1 - fetch, load and  show catagories on html
 
 // creating loadCatagories
@@ -29,9 +36,38 @@ const loadCategoryVideo = (id) => {
   // alert(id);
   fetch(`https://openapi.programming-hero.com/api/phero-tube/category/${id}`)
     .then((res) => res.json())
-    .then((data) => displayVideos(data.category))
+    .then((data) => {
+      // remove activation from btn
+      removeActiveClass();
+
+      // active btn
+      const activeBtn = document.getElementById(`btn-${id}`);
+      console.log(activeBtn);
+      activeBtn.classList.add("active");
+      displayVideos(data.category);
+    })
     .catch((error) => console.log(error));
 };
+
+const loadDetails = async (videoId) => {
+  const url = `https://openapi.programming-hero.com/api/phero-tube/video/${videoId}`
+  const res = await fetch(url);
+  const data = await res.json();
+  displayDetails(data.video)
+}
+const displayDetails = (video) => {
+  const detailContainer = document.getElementById("modal-content");
+  detailContainer.innerHTML = `
+  <img class="rounded-lg" src=${video.thumbnail} />
+  <P class = "text-gray-500">${video.description}</P>
+  
+  
+  `
+
+  document.getElementById("showModal").click()
+
+
+}
 
 const displayVideos = (videos) => {
   const videoContainer = document.getElementById("videos");
@@ -94,9 +130,18 @@ const displayVideos = (videos) => {
 
   <p class = "text-gray-500">${video.others.views} views </p>
   
-  </div>   
-    
+  </div>     
   </div>
+
+  <div>
+
+  <p> <button onclick="loadDetails('${video.video_id}') "class= "btn btn-sm btn-error">details</button> </p>
+  
+  
+  </div>
+
+
+
     `;
     videoContainer.append(card);
     console.log(video);
@@ -112,8 +157,10 @@ const displayCatagories = (catagories) => {
     const buttonContainer = document.createElement("div");
 
     buttonContainer.innerHTML = `
-    <button onclick="loadCategoryVideo(${item.category_id})" class = "btn">${item.category}</button>
+    <button id = "btn-${item.category_id}" onclick="loadCategoryVideo(${item.category_id})" class = "btn category-btn">${item.category}</button>
     `;
+
+    
 
     catagoriesContainer.append(buttonContainer);
   });
